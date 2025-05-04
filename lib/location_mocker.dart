@@ -2,51 +2,28 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:location_mocker/models/gpx_point.dart';
 import 'package:xml/xml.dart';
 
+import 'location_mocker_platform_interface.dart';
+
 class LocationMocker {
-  static const MethodChannel _channel = MethodChannel('location_mocker');
-  static const EventChannel _eventChannel =
-      EventChannel('location_mocker_events');
+  static final LocationMockerPlatform _platform =
+      LocationMockerPlatform.instance;
 
   /// Initialize the location mocker plugin
-  static Future<bool> initialize() async {
-    try {
-      final bool result = await _channel.invokeMethod('initialize');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to initialize: ${e.message}');
-      return false;
-    }
-  }
+  static Future<bool> initialize() => _platform.initialize();
 
   /// Check if mock location is enabled in developer options
-  static Future<bool> isMockLocationEnabled() async {
-    try {
-      final bool result = await _channel.invokeMethod('isMockLocationEnabled');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to check mock location status: ${e.message}');
-      return false;
-    }
-  }
+  static Future<bool> isMockLocationEnabled() =>
+      _platform.isMockLocationEnabled();
 
   /// Start location mocking with GPX data
   /// [gpxData] - String content of the GPX file
   /// [playbackSpeed] - Speed multiplier for location updates (1.0 = normal speed)
   static Future<bool> startMockingWithGpx(String gpxData,
-      {double playbackSpeed = 1.0}) async {
-    try {
-      final result = await _channel.invokeMethod('startMockingWithGpx', {
-        'gpxData': gpxData,
-        'playbackSpeed': playbackSpeed,
-      });
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to start mocking: ${e.message}');
-      return false;
-    }
+      {double playbackSpeed = 1.0}) {
+    return _platform.startMockingWithGpx(gpxData, playbackSpeed: playbackSpeed);
   }
 
   /// Start location mocking with GPX file
@@ -70,38 +47,16 @@ class LocationMocker {
 
   /// Update the playback speed during mocking
   /// [playbackSpeed] - Speed multiplier for location updates (1.0 = normal speed)
-  static Future<bool> updatePlaybackSpeed(double playbackSpeed) async {
-    try {
-      final result = await _channel.invokeMethod('updatePlaybackSpeed', {
-        'playbackSpeed': playbackSpeed,
-      });
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to update playback speed: ${e.message}');
-      return false;
-    }
+  static Future<bool> updatePlaybackSpeed(double playbackSpeed) {
+    return _platform.updatePlaybackSpeed(playbackSpeed);
   }
 
   /// Stop location mocking
-  static Future<bool> stopMocking() async {
-    try {
-      final result = await _channel.invokeMethod('stopMocking');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to stop mocking: ${e.message}');
-      return false;
-    }
-  }
+  static Future<bool> stopMocking() => _platform.stopMocking();
 
-  static Future<bool> openMockLocationSettings() async {
-    try {
-      final result = await _channel.invokeMethod('openMockLocationSettings');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to open settings: ${e.message}');
-      return false;
-    }
-  }
+  /// Open mock location settings on Android
+  static Future<bool> openMockLocationSettings() =>
+      _platform.openMockLocationSettings();
 
   /// Parse GPX data and return list of coordinates
   static List<GpxPoint> parseGpx(String gpxData) {
@@ -141,70 +96,11 @@ class LocationMocker {
   }
 
   /// Pause location mocking (keeping current position)
-  static Future<bool> pauseMocking() async {
-    try {
-      final result = await _channel.invokeMethod('pauseMocking');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to pause mocking: ${e.message}');
-      return false;
-    }
-  }
+  static Future<bool> pauseMocking() => _platform.pauseMocking();
 
   /// Resume location mocking from current position
-  static Future<bool> resumeMocking() async {
-    try {
-      final result = await _channel.invokeMethod('resumeMocking');
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint('Failed to resume mocking: ${e.message}');
-      return false;
-    }
-  }
+  static Future<bool> resumeMocking() => _platform.resumeMocking();
 
   /// Stream of location updates during mocking
-  static Stream<GpxPoint> get locationStream {
-    return _eventChannel.receiveBroadcastStream().map((event) {
-      final Map<String, dynamic> data = Map<String, dynamic>.from(event);
-      return GpxPoint(
-        latitude: data['latitude'],
-        longitude: data['longitude'],
-        elevation: data['elevation'],
-        time: data['time'] != null ? DateTime.parse(data['time']) : null,
-        bearing: data['bearing'],
-      );
-    });
-  }
-}
-
-/// Represents a point in a GPX track
-class GpxPoint {
-  final double latitude;
-  final double longitude;
-  final double? elevation;
-  final DateTime? time;
-  final double? bearing;
-
-  GpxPoint({
-    required this.latitude,
-    required this.longitude,
-    this.elevation,
-    this.time,
-    this.bearing,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'latitude': latitude,
-      'longitude': longitude,
-      'bearing': bearing,
-      'elevation': elevation,
-      'time': time?.toIso8601String(),
-    };
-  }
-
-  @override
-  String toString() {
-    return 'GpxPoint(lat: $latitude, lon: $longitude, ele: $elevation, time: $time)';
-  }
+  static Stream<GpxPoint> get locationStream => _platform.getLocationStream();
 }

@@ -17,8 +17,8 @@ extension RouteReader on String {
         final hdg =
             hdgElement != null ? double.tryParse(hdgElement.innerText) : null;
         return Coordinates(
-          latitude: lat,
-          longitude: lon,
+          lat,
+          lon,
           elevation: ele,
           heading: hdg,
         );

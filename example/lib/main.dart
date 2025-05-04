@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:location_mocker/location_mocker.dart';
 import 'package:location_mocker/models/coordinates.dart';
+import 'package:location_mocker/models/gpx_point.dart';
 import 'package:location_mocker/route_manager/route_manager.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +42,6 @@ class _LocationMockerPageState extends State<LocationMockerPage> {
   bool _isMocking = false;
   double _speed = 1.0;
   String? _routeFilePath;
-  RouteDeviationManager? _routeManager;
 
   @override
   void initState() {
@@ -89,13 +88,10 @@ class _LocationMockerPageState extends State<LocationMockerPage> {
     );
 
     // Save route to a file
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath =
-        await routeManager.exportGpxToFile('${directory.path}/sample_route');
+    final filePath = await routeManager.exportGpxToFile('sample_route');
 
     setState(() {
       _routeFilePath = filePath;
-      _routeManager = routeManager;
     });
   }
 
