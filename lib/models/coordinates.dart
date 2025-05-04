@@ -7,9 +7,9 @@ class Coordinates {
   final double? elevation;
   final double? heading;
 
-  const Coordinates({
-    required this.latitude,
-    required this.longitude,
+  const Coordinates(
+    this.latitude,
+    this.longitude, {
     this.elevation,
     this.heading,
   });
@@ -30,8 +30,8 @@ class Coordinates {
 
   factory Coordinates.fromJson(Map<String, dynamic> json) {
     return Coordinates(
-      latitude: json['latitude'],
-      longitude: json['longitude'],
+      json['latitude'],
+      json['longitude'],
       elevation: json['elevation'],
       heading: json['heading'],
     );

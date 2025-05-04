@@ -65,9 +65,12 @@ class RouteDeviationManager {
   /// Returns the path to the exported file.
   Future<String> exportGpxToFile([String? fileName]) async {
     try {
-      final Directory directory = await getDownloadDirectory();
+      final String? directoryPath = await getDownloadDirectoryPath();
+      if (directoryPath == null) {
+        throw Exception('Failed to get download directory path');
+      }
       final String filePath =
-          '${directory.path}/${fileName ?? 'route_${DateTime.now().millisecondsSinceEpoch}'}.gpx';
+          '$directoryPath/${fileName ?? 'route_${DateTime.now().millisecondsSinceEpoch}'}.gpx';
       final File file = File(filePath);
       await file.writeAsString(_currentRoute.value.toGPX());
       return filePath;
@@ -201,8 +204,8 @@ class RouteDeviationManager {
       // Convert the coordinates to GeoCoordinates objects
       return routeGeometry.map((coord) {
         return Coordinates(
-          longitude: coord[0],
-          latitude: coord[1],
+          coord[0],
+          coord[1],
           // OSRM doesn't provide elevation data
           elevation: null,
         );
@@ -279,8 +282,8 @@ class RouteDeviationManager {
             cos(angularDistance) - sin(lat1Rad) * sin(lat2Rad));
 
     return Coordinates(
-      latitude: lat2Rad * 180 / pi,
-      longitude: lon2Rad * 180 / pi,
+      lat2Rad * 180 / pi,
+      lon2Rad * 180 / pi,
       elevation: startPoint.elevation,
     );
   }
