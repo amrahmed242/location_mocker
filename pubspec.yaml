@@ -1,7 +1,7 @@
 name: location_mocker
 description: A comprehensive Flutter plugin for GPS location mocking, route manipulation, and GPX file handling
 version: 0.0.1
-homepage:
+homepage: https://github.com/amrahmed242/location_mocker
 
 environment:
   sdk: '>=3.1.5 <4.0.0'
